@@ -57,7 +57,7 @@ class APIClient {
               return juice
           })
           .catch((e)=>{
-              console.log(e)
+              console.log("Problem connecting to FMC API")
           })
   }
 }
