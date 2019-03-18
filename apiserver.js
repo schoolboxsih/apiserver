@@ -5,11 +5,7 @@ const cors = require('cors')
 const firepower = require('./firepower')
 const db = require('./database')
 
-/*
-*****************
-INITS
-*****************
-*/
+/* INITS */
 
 // express init
 const PORT = 9004
@@ -30,17 +26,13 @@ fpAPIClient.generatetoken().then(e => {
     start()
 })
 
-// utils
+// util functions
 const returnJSON = (res, r) => {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(r))
 }
 
-/*
-*****************
-ROUTES
-*****************
-*/
+/* ROUTES */
 
 // return data of all users
 app.get('/users/allstudents', (req, res) => {
@@ -78,3 +70,23 @@ app.get('/fmc/syslog', (req, res) => {
         console.log(e)
       })
 })
+
+
+/**
+URL:
+Traffic by URL
+Traffic by URL Category
+Traffic by URL Reputation
+
+Network Information:
+Operating Systems
+Traffic by Source IP
+Traffic by Source User
+Connections by Access Control Action
+Traffic by Destination IP
+
+Analysis > Users > Users
+
+Policies
+Access Control
+*/

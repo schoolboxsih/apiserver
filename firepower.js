@@ -1,5 +1,4 @@
 const axios = require("axios")
-const baseURL = ""
 
 // DON'T VERIFY TLS
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
@@ -63,7 +62,6 @@ class APIClient {
   }
 }
 
-// functions
 module.exports = {
     APIClient
 }
