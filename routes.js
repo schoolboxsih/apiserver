@@ -15,6 +15,13 @@ const start = ( app, port ) => {
     fpAPIClient.generatetoken()
     .then(e => {
         ep = e.endpoints
+        db.fetchURLs().then(u => {
+          console.log(u)
+          //fp.get(ep.urlobjects).then(e=>{ }).catch(e=>{ })
+        })
+        db.fetchNetworks().then(u => { console.log(u) })
+        db.fetchVlans().then(u => { console.log(u) })
+
         app.listen(port, () => console.log(`listening on port ${port}!`))
     })
 }
