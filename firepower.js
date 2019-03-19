@@ -30,11 +30,14 @@ class APIClient {
     return this.apiclient
   }
 
-  refreshEndpoints(){
+  refreshEndpoints(containerId=''){
     return {
   	    syslogalerts : `fmc_config/v1/domain/${this.globalid}/policy/syslogalerts`,
   	    urlobjects : `fmc_config/v1/domain/${this.globalid}/object/urls`,
-  	    accesspolicyobjects: `fmc_config/v1/domain/${this.globalid}/policy/accesspolicies`,
+  	    netobjects : `fmc_config/v1/domain/${this.globalid}/object/networks`,
+  	    vlanobjects : `fmc_config/v1/domain/${this.globalid}/object/vlantags`,
+  	    accesspolicies: `fmc_config/v1/domain/${this.globalid}/policy/accesspolicies`,
+  	    accessrules: `fmc_config/v1/domain/${this.globalid}/policy/accesspolicies/${containerId}/accessrules`,
   	    serverversion : "fmc_platform/v1/info/serverversion",
     } 
   }

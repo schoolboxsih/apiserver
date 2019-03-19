@@ -18,6 +18,17 @@ const start = ( app, port ) => {
         app.listen(port, () => console.log(`listening on port ${port}!`))
     })
 }
+const fetchUrl = (id) => {
+    return fp.get(`${ep.urlobjects}/${id}`)
+}
+
+const fetchNet = (id) => {
+    return fp.get(`${ep.netobjects}/${id}`)
+}
+
+const fetchVlan = (id) => {
+    return fp.get(`${ep.vlanbjects}/${id}`)
+}
 
 // functions
 const getfmcsyslog = (req, res) => {
@@ -64,7 +75,70 @@ const refreshtoken = (req, res) => {
     })
 }
 
-const createUrls = (req, res) => {
+const createNetwork = (req, res) => {
+    if( !(req.body.name && req.body.network) ) {
+        res.status(400)
+        returnJSON(res, {error: 'required body params not found'})
+    }
+    let data = {
+        name: req.body.name,
+        value: req.body.network
+    }
+    //let dbEntryExists = db.query_if_network_name_exists // entry/undefined
+
+    fp.post(ep.netobjects, data)
+      .then(e=>{
+        // write to urls table locally, we'll need the name and the id that's all
+        // STEPS:
+        // if dbEntryExists is defined
+        //  just add the uuid
+        // else
+        //  add new db entry with the uuid and all
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        } else {
+            res.status(400)
+            returnJSON(res, { error: e.response.data.error })
+            // if error is that fmc already has something with this name,
+            // fetch the uuid of that name and put it in the db entry based on dbEntryExists
+        }
+      })
+}
+
+const createVlan = (req, res) => {
+    if( !(req.body.name && req.body.data) ) {
+        res.status(400)
+        returnJSON(res, {error: 'required body params not found'})
+    }
+    let data = {
+        name: req.body.name,
+        data: req.body.data,
+    }
+    // "data": {
+    //    "startTag": 888,
+    //    "endTag": 999,
+    //    "type": "VlanTagLiteral"
+    // }
+    fp.post(ep.vlanobjects, data)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        } else {
+            res.status(400)
+            returnJSON(res, { error: e.response.data.error })
+        }
+      })
+}
+
+const createUrl = (req, res) => {
     if( !(req.body.name && req.body.url) ) {
         res.status(400)
         returnJSON(res, {error: 'required body params not found'})
@@ -75,6 +149,7 @@ const createUrls = (req, res) => {
     }
     fp.post(ep.urlobjects, data)
       .then(e=>{
+        // write to urls table locally, we'll need the name and the id that's all
         returnJSON(res, e.data)
       })
       .catch(e=>{
@@ -101,8 +176,94 @@ const fetchUrls = (req, res) => {
       })
 }
 
+
+const fetchAccessRules = (req, res) => {
+    if( !req.query.id ) {
+        res.status(400)
+        returnJSON(res, {error: 'required query params not found'})
+    }
+    let id = req.query.id
+    ep = fpAPIClient.refreshEndpoints(id)
+    fp.get(ep.accessrules)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        } else {
+            res.status(400)
+            returnJSON(res, { error: e.response.data.error })
+        }
+      })
+}
+
+const createAccessRule = (req, res) => {
+    const bodyparams = ['name','action','enabled','urlIDs','sNetIDs','dNetIDs','vlanIDs']
+    const actionstring = ['ALLOW', 'BLOCK'] // just not using anything else now
+
+    // validation
+    if( !req.query.id ) {
+        res.status(400)
+        returnJSON(res, {error: 'required query params not found'})
+    }
+    if ( bodyparams.map(p=>res.body[p]).includes(undefined) ) {
+        res.status(400)
+        returnJSON(res, {error: 'required body params not found'})
+    }
+    if ( !actionstring.includes(res.body.action) ) {
+        res.status(400)
+        returnJSON(res, {error: 'action must be one of ALLOW or BLOCK for now'})
+    }
+
+    let id = req.query.id
+    let urls = req.body.urlIDs.map(x=>fetchUrl(x))
+    let sNets = req.body.sNetIDs.map(x=>fetchNet(x))
+    let dNets = req.body.dNetIDs.map(x=>fetchNet(x))
+    let vlans = req.body.vlanIDs.map(x=>fetchVlan(x))
+
+    let allPs = Promise.all(urls.concat(sNets, dNets, vlans))
+    allPs.then(d => {
+        urls = d.splice(0, urls.length)
+        sNets = d.splice(0, sNets.length)
+        dNets = d.splice(0, dNets.length)
+        vlans = d.splice(0, vlans.length)
+    })
+    .catch(e=> {
+        res.status(500)
+        returnJSON(res, { error: 'Could not connect to FMC API server' })
+    })
+
+    let data = {
+        enabled: true,
+        sendEventsToFMC: true,
+        urls: [],
+        action: res.body.action,
+        sourceNetworks: [],
+        destinationNetworks: [],
+        vlanTags: [],
+        enableSyslog: true,
+    }
+
+    ep = fpAPIClient.refreshEndpoints(id)
+    fp.post(ep.accessrules, data)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        } else {
+            res.status(400)
+            returnJSON(res, { error: e.response.data.error })
+        }
+      })
+}
+
 const fetchAccessPolicies = (req, res) => {
-    fp.get(ep.accesspolicyobjects)
+    fp.get(ep.accesspolicies)
       .then(e=>{
         returnJSON(res, e.data)
       })
@@ -132,22 +293,6 @@ Analysis > Users > Users
 Policies
 Access Control
 
-
---
-Create URL Objects
-"/api/fmc_config/v1/domain/e276abec-e0f2-11e3-8169-6d9ed49b625f/object/urls"
-
-Create Rules
-api_path = "/api/fmc_config/v1/domain/e276abec-e0f2-11e3-8169-6d9ed49b625f/policy/accesspolicies/{}/accessrules".format(container_id)    # param
-
-Create Policy
-api_path = "/api/fmc_config/v1/domain/e276abec-e0f2-11e3-8169-6d9ed49b625f/policy/accesspolicies"    # param
-
-Fetch Policy
-api_path = "/api/fmc_config/v1/domain/e276abec-e0f2-11e3-8169-6d9ed49b625f/policy/accesspolicies/{}".format(idx)    # param
-
----
-
 Objects:
 - VLAN Tags
     - Students
@@ -157,8 +302,6 @@ Objects:
     - each classrooms will be one network
 - Ports
 - Applications ??
-- URL
-    - Create URL groups of it
 - Time range
 - ACL ( to block networks ) - extended to block some internal network from accessing outside network
 
@@ -175,6 +318,7 @@ module.exports = {
   refreshtoken,
   getfmcinfo,
   fetchUrls,
-  createUrls,
+  createUrl,
+  fetchAccessRules,
   fetchAccessPolicies,
 }

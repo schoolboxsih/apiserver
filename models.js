@@ -54,7 +54,57 @@ const createUserModel = (db) => {
   })
 }
 
+// URL Model
+const createURLModel = (db) => {
+  return db.define('urls', {
+      id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      name: Sequelize.STRING,
+      uuid: Sequelize.STRING,
+      url: Sequelize.STRING,
+  },{
+    tableName: 'urls',
+    timestamps: false
+  })
+}
+
+// VLAN Model TODO
+const createVLANModel = (db) => {
+  return db.define('vlans', {
+      id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      name: Sequelize.STRING,
+  },{
+    tableName: 'vlans',
+    timestamps: false
+  })
+}
+
+// Network Model TODO
+const createNetworkModel = (db) => {
+  return db.define('networks', {
+      id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      name: Sequelize.STRING,
+  },{
+    tableName: 'networks',
+    timestamps: false
+  })
+}
+
 module.exports = {
  createaccDataModel,
- createUserModel
+ createUserModel,
+ createURLModel,
+ createVLANModel,
+ createNetworkModel,
 }
