@@ -71,7 +71,7 @@ const createURLModel = (db) => {
   })
 }
 
-// VLAN Model TODO
+// VLAN Model
 const createVLANModel = (db) => {
   return db.define('vlans', {
       id: {
@@ -80,13 +80,15 @@ const createVLANModel = (db) => {
         primaryKey: true
       },
       name: Sequelize.STRING,
+      starttag: Sequelize.INTEGER,
+      endtag: Sequelize.INTEGER,
   },{
     tableName: 'vlans',
     timestamps: false
   })
 }
 
-// Network Model TODO
+// Network Model
 const createNetworkModel = (db) => {
   return db.define('networks', {
       id: {
@@ -95,6 +97,8 @@ const createNetworkModel = (db) => {
         primaryKey: true
       },
       name: Sequelize.STRING,
+      uuid: Sequelize.STRING,
+      network: Sequelize.STRING,
   },{
     tableName: 'networks',
     timestamps: false
