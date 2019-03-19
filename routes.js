@@ -282,42 +282,6 @@ const fetchAccessPolicies = (req, res) => {
       })
 }
 
-/**
-URL:
-Traffic by URL
-Traffic by URL Category
-Traffic by URL Reputation
-
-Network Information:
-Operating Systems
-Traffic by Source IP
-Traffic by Source User
-Connections by Access Control Action
-Traffic by Destination IP
-
-Analysis > Users > Users
-
-Policies
-Access Control
-
-Objects:
-- VLAN Tags
-    - Students
-    - Teachers
-    - Unknown
-- Add Networks
-    - each classrooms will be one network
-- Ports
-- Applications ??
-- Time range
-- ACL ( to block networks ) - extended to block some internal network from accessing outside network
-
-Policies: 
-- Access Control
-- DNS
-
-*/
-
 module.exports = {
   start,
   getfmcsyslog,
