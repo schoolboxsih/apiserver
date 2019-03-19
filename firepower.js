@@ -33,6 +33,8 @@ class APIClient {
   refreshEndpoints(){
     return {
   	    syslogalerts : `fmc_config/v1/domain/${this.globalid}/policy/syslogalerts`,
+  	    urlobjects : `fmc_config/v1/domain/${this.globalid}/object/urls`,
+  	    accesspolicyobjects: `fmc_config/v1/domain/${this.globalid}/policy/accesspolicies`,
   	    serverversion : "fmc_platform/v1/info/serverversion",
     } 
   }

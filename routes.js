@@ -26,7 +26,9 @@ const getfmcsyslog = (req, res) => {
         returnJSON(res, e.data)
       })
       .catch(e=>{
-        console.log(e)
+        if( e.code == 'EHOSTUNREACH' ){
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        }
       })
 }
 
@@ -36,7 +38,10 @@ const getfmcinfo = (req, res) => {
         returnJSON(res, e.data)
       })
       .catch(e=>{
-        console.log(e)
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        }
       })
 }
 
@@ -46,7 +51,10 @@ const getallstudents = (req, res) => {
         returnJSON(res, r)
       })
       .catch(e=>{
-        console.log(e)
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        }
       })
 }
 
@@ -55,6 +63,57 @@ const refreshtoken = (req, res) => {
         ep = e.endpoints
     })
 }
+
+const createUrls = (req, res) => {
+    if( !(req.body.name && req.body.url) ) {
+        res.status(400)
+        returnJSON(res, {error: 'required body params not found'})
+    }
+    let data = {
+        name: req.body.name,
+        url: req.body.url
+    }
+    fp.post(ep.urlobjects, data)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        } else {
+            res.status(400)
+            returnJSON(res, { error: e.response.data.error })
+        }
+      })
+}
+
+const fetchUrls = (req, res) => {
+    fp.get(ep.urlobjects)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        }
+      })
+}
+
+const fetchAccessPolicies = (req, res) => {
+    fp.get(ep.accesspolicyobjects)
+      .then(e=>{
+        returnJSON(res, e.data)
+      })
+      .catch(e=>{
+        if( e.code == 'EHOSTUNREACH' ){
+            res.status(0)
+            returnJSON(res, {error: 'unable to reach api endpoint'})
+        }
+      })
+}
+
 /**
 URL:
 Traffic by URL
@@ -115,4 +174,7 @@ module.exports = {
   getallstudents,
   refreshtoken,
   getfmcinfo,
+  fetchUrls,
+  createUrls,
+  fetchAccessPolicies,
 }
