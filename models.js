@@ -54,6 +54,22 @@ const createUserModel = (db) => {
   })
 }
 
+const createUserGroupModel = (db) => {
+  return db.define('radusergroup', {
+      id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      username: Sequelize.STRING,
+      groupname: Sequelize.STRING,
+      priority: Sequelize.INTEGER,
+  },{
+    tableName: 'radusergroup',
+    timestamps: false
+  })
+}
+
 // URL Model
 const createURLModel = (db) => {
   return db.define('urls', {

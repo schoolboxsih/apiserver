@@ -15,6 +15,7 @@ const db = new Sequelize(MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD, {
 // models
 const AccData = model.createaccDataModel(db)
 const User = model.createUserModel(db)
+const UserGroup = model.createUserGroupModel(db)
 const URL = model.createURLModel(db)
 const Network = model.createNetworkModel(db)
 const Vlan = model.createVLANModel(db)
@@ -35,13 +36,37 @@ const fetchNetwork = (uuid) => ( Network.findOne({ where: {uuid: uuid} }) )
 const fetchVlans = () => ( Vlan.findAll() )
 const fetchVlan = (uuid) => ( Vlan.findOne({ where: {uuid: uuid} }) )
 
-// create
-const createUser = (username, password) => {
-  return User.create({ username: username, attribute: 'Cleartext-Password', op: ':=', value: password })
+const fetchStudentUsernamesOfClass = (classname)  => {
+    return UserGroup.findAll({
+      attributes: ['username']
+      where: {
+        groupname: classname
+      }
+    })
 }
+
+// create
+const createUser = (username, password, email, name, group) => {
+  let user = User.create({
+    username: username,
+    email: email,
+    name: name,
+    attribute: 'Cleartext-Password',
+    op: ':=',
+    value: password,
+    })
+
+  let usergroup = UserGroup.create({
+    username: username,
+    groupname: group,
+    })
+  return [user, usergroup]
+}
+
 const createURL = (name, url, uuid) => {
   return URL.create({ name: name, url: url, uuid: uuid })
 }
+
 const createNetwork = (name, network, uuid) => {
   return Network.create({ name: name, network: network, uuid: uuid })
 }
@@ -77,6 +102,7 @@ module.exports = {
     fetchNetwork,
     fetchVlans,
     fetchVlan,
+    fetchStudentUsernamesOfClass,
     createUser,
     createURL,
     createNetwork,

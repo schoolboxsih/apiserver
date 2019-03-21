@@ -15,10 +15,14 @@ r.start(app, PORT)
 app.get('/users/allstudents', r.getallstudents) // data of all users
 
 // firepower
+
+// gets
 app.get('/fmc/refresh', r.refreshtoken) // refresh token
 app.get('/fmc/objects/urls', r.fetchUrls) // fmc url objects
-app.post('/fmc/objects/urls', jp, r.createUrl) // fmc url objects
 app.get('/fmc/accesspolicies', r.fetchAccessPolicies) // fmc access policies
 app.get('/fmc/accessrules', r.fetchAccessRules) // fmc access policy rules
 app.get('/fmc/firewallinfo', r.getfmcinfo) // firewall info
 app.get('/fmc/syslogalerts', r.getfmcsyslog) // syslog alerts
+
+// posts
+app.post('/fmc/objects/urls', jp, r.createUrl) // fmc url objects
